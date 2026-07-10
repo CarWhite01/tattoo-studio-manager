@@ -1,0 +1,178 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { supabase } from '../lib/supabase.js';
+
+const { data: citas, error } = await supabase
+  .from('citas')
+  .select('*')
+  .order('fecha', { ascending: true });
+
+if (error) {
+  console.error("Error al cargar las citas:", error);
+}
+---
+
+<Layout>
+  <main id="admin-panel" class="min-h-screen bg-black text-white p-6 sm:p-12 pt-24 hidden">
+    <div class="max-w-6xl mx-auto">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-8 mb-10">
+        <div>
+          <span class="text-xs uppercase tracking-[0.3em] text-red-600 font-semibold block mb-2">Panel de Control</span>
+          <h1 class="font-bold text-3xl sm:text-5xl uppercase tracking-tight">Agenda de Sergio</h1>
+        </div>
+        <div class="bg-neutral-900 border border-white/10 px-4 py-2 text-xs uppercase tracking-wider font-semibold text-neutral-400">
+          Total: <span class="text-white font-bold">{citas ? citas.length : 0} citas</span>
+        </div>
+      </div>
+
+      <div class="bg-neutral-950 border border-white/10 overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-white/10 bg-neutral-900/50 text-xs uppercase tracking-wider text-neutral-400">
+              <th class="p-4 font-bold">Cliente</th>
+              <th class="p-4 font-bold">Fecha y Hora de Cita</th>
+              <th class="p-4 font-bold">Detalles del Tatuaje</th>
+              <th class="p-4 font-bold">Estado</th>
+              <th class="p-4 font-bold text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5 text-sm">
+            {citas && citas.length > 0 ? (
+              citas.map((cita) => (
+                <tr class="hover:bg-neutral-900/30 transition-colors">
+                  <td class="p-4">
+                    <div class="font-semibold text-white">{cita.nombre_cliente}</div>
+                    <div class="text-[10px] text-neutral-500 mt-1 uppercase tracking-wider">
+                      Registrado: <br/> 
+                      <span class="text-neutral-400">
+                        {new Date(cita.created_at).toLocaleDateString('es-MX')} a las {new Date(cita.created_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </td>
+                  
+                  <td class="p-4 text-neutral-300">
+                    <div class="font-medium text-emerald-400">{cita.fecha}</div>
+                    <div class="text-xs text-neutral-400 mt-0.5">{cita.hora.substring(0, 5)} hrs</div>
+                  </td>
+                  
+                  <td class="p-4 text-neutral-400 max-w-xs truncate" title={cita.idea_tatuaje}>
+                    {cita.idea_tatuaje || <span class="italic text-neutral-600">Sin descripción</span>}
+                  </td>
+                  
+                  <td class="p-4">
+                    <select 
+                      data-id={cita.id} 
+                      class="estado-select bg-neutral-900 border border-white/10 text-xs uppercase tracking-wider font-bold p-2 focus:border-red-600 focus:outline-none cursor-pointer hover:bg-neutral-800 transition-colors"
+                    >
+                      <option value="pendiente" selected={cita.estado === 'pendiente'}>Pendiente</option>
+                      <option value="confirmado" selected={cita.estado === 'confirmado'}>Confirmado</option>
+                      <option value="cancelado" selected={cita.estado === 'cancelado'}>Cancelado</option>
+                    </select>
+                  </td>
+                  
+                  <td class="p-4 text-center">
+                    <button 
+                      class="btn-whatsapp inline-block bg-neutral-900 border border-white/10 hover:border-emerald-500 hover:text-emerald-400 px-3 py-2 text-xs uppercase tracking-wider font-semibold transition-colors"
+                      data-nombre={cita.nombre_cliente}
+                      data-whatsapp={cita.whatsapp}
+                      data-fecha={cita.fecha}
+                    >
+                      💬 WhatsApp
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colspan="5" class="p-12 text-center text-neutral-500 uppercase tracking-widest text-xs">
+                  No hay citas registradas en la agenda.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase.js';
+
+  // --- CANDADO DE SEGURIDAD NIVEL 1 ---
+  const panel = document.getElementById('admin-panel');
+  if (panel) {
+    if (localStorage.getItem('admin_authenticated') !== 'true') {
+      const password = prompt('Introduce la contraseña del Panel de Sergio:');
+      if (password === 'sergio123') { // <-- Aquí cambias la clave si quieres
+        localStorage.setItem('admin_authenticated', 'true');
+        panel.classList.remove('hidden');
+      } else {
+        alert('Contraseña incorrecta, cawon.');
+        window.location.href = '/'; // Lo echa a la página principal
+      }
+    } else {
+      panel.classList.remove('hidden');
+    }
+  }
+
+  // 1. Guardar cambio de estado
+  const selects = document.querySelectorAll('.estado-select');
+  selects.forEach(select => {
+    select.addEventListener('change', async (e) => {
+      const target = e.target as HTMLSelectElement;
+      const citaId = target.getAttribute('data-id');
+      const nuevoEstado = target.value;
+
+      target.style.opacity = '0.5';
+      const { error } = await supabase
+        .from('citas')
+        .update({ estado: nuevoEstado })
+        .eq('id', citaId);
+      target.style.opacity = '1';
+
+      if (error) {
+        alert('Error al actualizar: ' + error.message);
+      }
+    });
+  });
+
+  // 2. WhatsApp Inteligente con Anticipos Unificados
+  const botonesWa = document.querySelectorAll('.btn-whatsapp');
+  botonesWa.forEach(boton => {
+    boton.addEventListener('click', (e) => {
+      const target = e.target as HTMLButtonElement;
+      const nombre = target.getAttribute('data-nombre');
+      const telefono = target.getAttribute('data-whatsapp');
+      const fecha = target.getAttribute('data-fecha');
+      
+      const fila = target.closest('tr');
+      const estadoActual = (fila.querySelector('.estado-select') as HTMLSelectElement).value;
+      
+      let mensaje = "";
+      
+      if (estadoActual === 'pendiente') {
+        mensaje = `Hola ${nombre}, soy Sergio. Vi tu solicitud de tatuaje para el día ${fecha}. Déjame revisar bien los horarios y te confirmo en breve.`;
+      } 
+      else if (estadoActual === 'confirmado') {
+        mensaje = `¡Qué onda ${nombre}! Soy Sergio. Tu cita para el día ${fecha} está confirmadísima. 🔥\n\n` +
+                  `Para apartar oficialmente tu bloque en la agenda, se requiere un anticipo de $500 MXN. Tienes estas dos opciones bien fáciles:\n\n` +
+                  `1️⃣ OPCIÓN MÁS RÁPIDA (Link de Mercado Pago para Tarjeta o OXXO):\n` +
+                  `👉 https://link.mercadopago.com.mx/anticiposerh\n\n` +
+                  `2️⃣ TRANSFERENCIA DIRECTA (SPEI):\n` +
+                  `• Banco: BBVA\n` +
+                  `• CLABE: 012345678901234567\n` +
+                  `• O deposita a la tarjeta: 4152 3134 0000 0000\n\n` +
+                  `En cuanto quede listo, me mandas la captura del comprobante por aquí para cerrar el sistema. ¡Un abrazo!`;
+      } 
+      else if (estadoActual === 'cancelado') {
+        mensaje = `Hola ${nombre}, soy Sergio. Te escribo porque lamentablemente no tendré disponibilidad para armar tu tatuaje el día ${fecha}. ¿Te late si buscamos otra fecha libre en el calendario?`;
+      }
+
+      const url = `https://wa.me/52${telefono}?text=${encodeURIComponent(mensaje)}`;
+      window.open(url, '_blank');
+    });
+  });
+</script>

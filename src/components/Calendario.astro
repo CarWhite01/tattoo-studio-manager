@@ -1,0 +1,186 @@
+---
+---
+<section id="calendario" class="py-24 bg-neutral-950 px-4 border-t border-white/10">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12">
+            <span class="text-xs uppercase tracking-[0.3em] text-red-600 font-semibold block mb-2">Agenda en Línea</span>
+            <h2 class="font-bold text-3xl sm:text-5xl uppercase text-white tracking-tight">Aparta tu Sesión</h2>
+            <p class="text-neutral-400 text-sm max-w-md mx-auto mt-3">
+                Selecciona tu fecha, hora y cuéntanos tu idea. Los datos se registrarán directamente en el sistema de Sergio.
+            </p>
+        </div>
+
+        <div class="bg-black border border-white/10 p-6 sm:p-10 max-w-xl mx-auto">
+            <form id="booking-form" class="space-y-6">
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Tu Nombre Completo</label>
+                    <input type="text" id="nombre" required class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors" placeholder="Ej. Juan Pérez">
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">WhatsApp (10 dígitos sin espacios)</label>
+                    <input 
+                      type="tel" 
+                      id="whatsapp" 
+                      required 
+                      minlength="10"
+                      maxlength="10"
+                      pattern="[0-9]{10}"
+                      class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors" 
+                      placeholder="Ej. 5512345678"
+                    >
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Fecha de la Cita</label>
+                        <input type="date" id="fecha" required class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Hora (Bloques de 3h)</label>
+                        <select id="hora" required class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors">
+                            <option value="11:00">11:00 AM</option>
+                            <option value="14:00">02:00 PM</option>
+                            <option value="17:00">05:00 PM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Estilo</label>
+                        <select id="estilo" required class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors">
+                            <option value="Blackwork">Blackwork</option>
+                            <option value="Realismo">Realismo</option>
+                            <option value="Tradicional">Tradicional</option>
+                            <option value="Japonés">Japonés</option>
+                            <option value="Minimalista">Minimalista</option>
+                            <option value="Otro">Otro (Especificar abajo)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Zona</label>
+                        <select id="zona" required class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors">
+                            <option value="" disabled selected>Elige una zona...</option>
+                            <option value="Brazo / Antebrazo">Brazo / Antebrazo</option>
+                            <option value="Pierna / Pantorrilla">Pierna / Pantorrilla</option>
+                            <option value="Pecho / Clavícula">Pecho / Clavícula</option>
+                            <option value="Espalda / Costillas">Espalda / Costillas</option>
+                            <option value="Cuello / Nuca">Cuello / Nuca</option>
+                            <option value="Mano / Dedos">Mano / Dedos</option>
+                            <option value="Otra">Otra (Especificar abajo)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Tamaño</label>
+                        <select id="tamano" required class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors">
+                            <option value="Pequeño (1-5cm)">Pequeño (1-5cm)</option>
+                            <option value="Mediano (5-15cm)">Mediano (5-15cm)</option>
+                            <option value="Grande (+15cm)">Grande (+15cm)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Detalles extras / Hora en específico</label>
+                    <textarea id="detalles" rows="2" class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors" placeholder="Ej. Me gustaría que fuera a las 3:00 PM, o el estilo es diferente..."></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-white text-black font-bold uppercase text-sm py-4 tracking-wider hover:bg-red-600 hover:text-white transition-colors duration-300">
+                    Confirmar y Agendar
+                </button>
+                
+                <p id="form-status" class="text-center text-xs uppercase tracking-wider font-semibold hidden"></p>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    import { supabase } from '../lib/supabase.js';
+
+    const form = document.getElementById('booking-form');
+    const statusText = document.getElementById('form-status');
+    const fechaInput = document.getElementById('fecha');
+    const horaSelect = document.getElementById('hora');
+
+    if (fechaInput && horaSelect) {
+        fechaInput.addEventListener('change', async (e) => {
+            const target = e.target as HTMLInputElement;
+            const fechaSeleccionada = target.value;
+            
+            Array.from(horaSelect.options).forEach(opt => {
+                opt.disabled = false;
+                opt.text = opt.text.replace(' (Ocupado)', '');
+            });
+
+            if (!fechaSeleccionada) return;
+
+            const { data, error } = await supabase
+                .from('citas')
+                .select('hora')
+                .eq('fecha', fechaSeleccionada);
+
+            if (error) {
+                console.error("Error al buscar horarios:", error);
+                return;
+            }
+
+            if (data && data.length > 0) {
+                const horasOcupadas = data.map(cita => cita.hora.substring(0, 5));
+                
+                Array.from(horaSelect.options).forEach(opt => {
+                    if (horasOcupadas.includes(opt.value)) {
+                        opt.disabled = true;
+                        opt.text = `${opt.text} (Ocupado)`;
+                    }
+                });
+            }
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            statusText.classList.remove('hidden', 'text-red-500', 'text-green-500');
+            statusText.classList.add('text-neutral-400');
+            statusText.innerText = 'Procesando tu cita...';
+
+            const nombre = (document.getElementById('nombre') as HTMLInputElement).value;
+            const whatsapp = (document.getElementById('whatsapp') as HTMLInputElement).value;
+            const fecha = (document.getElementById('fecha') as HTMLInputElement).value;
+            const hora = (document.getElementById('hora') as HTMLSelectElement).value;
+            
+            const estilo = (document.getElementById('estilo') as HTMLSelectElement).value;
+            const zona = (document.getElementById('zona') as HTMLSelectElement).value;
+            const tamano = (document.getElementById('tamano') as HTMLSelectElement).value;
+            const detalles = (document.getElementById('detalles') as HTMLTextAreaElement).value;
+
+            const ideaFinal = `Estilo: ${estilo} | Zona: ${zona} | Tamaño: ${tamano} | Notas: ${detalles || 'Ninguna'}`;
+
+            const { error } = await supabase
+                .from('citas')
+                .insert([
+                    { 
+                        nombre_cliente: nombre, 
+                        whatsapp: whatsapp, 
+                        fecha: fecha, 
+                        hora: hora, 
+                        idea_tatuaje: ideaFinal 
+                    }
+                ]);
+
+            if (error) {
+                statusText.classList.replace('text-neutral-400', 'text-red-500');
+                statusText.innerText = 'Error al agendar: ' + error.message;
+                console.error("Error de Supabase:", error);
+            } else {
+                statusText.classList.replace('text-neutral-400', 'text-green-500');
+                statusText.innerText = '¡Cita registrada con éxito en Supabase!';
+                (form as HTMLFormElement).reset();
+                fechaInput.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+</script>
