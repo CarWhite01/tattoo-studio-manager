@@ -39,6 +39,9 @@ create unique index if not exists citas_fecha_hora_activa
 -- 4. Row Level Security: nadie lee nada a menos que una regla lo permita
 alter table public.citas enable row level security;
 
+-- Reglas viejas de la primera versión (dejaban ver todas las citas a cualquiera)
+drop policy if exists "Permitir lectura pública de citas"    on public.citas;
+drop policy if exists "Permitir insertar citas desde la web" on public.citas;
 drop policy if exists "Publico puede leer todo"      on public.citas;
 drop policy if exists "Clientes pueden agendar"      on public.citas;
 drop policy if exists "Admin puede ver citas"        on public.citas;
