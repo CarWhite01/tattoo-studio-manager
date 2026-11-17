@@ -1,16 +1,38 @@
 ---
 import '../styles/global.css';
+
+interface Props {
+	title?: string;
+	description?: string;
+	noindex?: boolean;
+}
+
+const {
+	title = 'Sonikoner | Estudio Privado de Tatuajes en Mixcoac, CDMX',
+	description = 'Estudio privado de tatuajes de Sergio Palma en Mixcoac, CDMX. Especialistas en Blackwork y Fine Line. Agenda tu sesión en línea.',
+	noindex = false,
+} = Astro.props;
 ---
 
 <!doctype html>
 <html lang="es">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Sonikoner | Estudio Privado</title>
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+		<!-- Vista previa al compartir el link en WhatsApp / Instagram / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:locale" content="es_MX" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="theme-color" content="#000000" />
 	</head>
 	<body class="bg-black text-white min-h-screen">
 		<slot />

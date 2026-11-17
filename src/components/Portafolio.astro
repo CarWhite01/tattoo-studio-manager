@@ -1,5 +1,24 @@
 ---
-// Aquí podrías más adelante traer las imágenes desde una base de datos
+// Para poner tus fotos reales: guárdalas en /public/portafolio/ y escribe
+// la ruta en `imagen`, por ejemplo: imagen: '/portafolio/manga-sombras.jpg'.
+// Mientras `imagen` esté vacía se muestra un recuadro de ejemplo.
+type Pieza = {
+    titulo: string;
+    estilo: 'Blackwork' | 'Fine Line';
+    imagen?: string;
+};
+
+const piezas: Pieza[] = [
+    { titulo: 'Manga Completa - Sombras', estilo: 'Blackwork' },
+    { titulo: 'Geométrico Espalda', estilo: 'Fine Line' },
+    { titulo: 'Lettering Pecho', estilo: 'Fine Line' },
+    { titulo: 'Micro-realismo', estilo: 'Fine Line' },
+];
+
+const filtros = ['Todos', 'Blackwork', 'Fine Line'];
+
+// Tamaño en la cuadrícula: la 1ª grande, la 2ª vertical, el resto normales
+const tamanos = ['md:col-span-2 md:row-span-2', 'md:row-span-2'];
 ---
 <section id="portafolio" class="py-24 bg-black px-4">
     <div class="max-w-6xl mx-auto">
@@ -8,55 +27,69 @@
                 <span class="text-xs uppercase tracking-[0.3em] text-red-600 font-semibold block mb-2">Galería</span>
                 <h2 class="font-bold text-3xl sm:text-5xl uppercase text-white tracking-tight">Piezas Recientes</h2>
             </div>
-            <div class="flex flex-wrap gap-2 text-xs uppercase tracking-wider font-semibold">
-                <span class="bg-white text-black px-4 py-2 cursor-pointer">Todos</span>
-                <span class="border border-white/10 text-neutral-400 px-4 py-2 hover:border-white/30 cursor-pointer transition-colors">Blackwork</span>
-                <span class="border border-white/10 text-neutral-400 px-4 py-2 hover:border-white/30 cursor-pointer transition-colors">Fine Line</span>
+            <div class="flex flex-wrap gap-2 text-xs uppercase tracking-wider font-semibold" role="group" aria-label="Filtrar por estilo">
+                {filtros.map((filtro, i) => (
+                    <button
+                        type="button"
+                        data-filtro={filtro}
+                        aria-pressed={i === 0 ? 'true' : 'false'}
+                        class="filtro-btn border px-4 py-2 transition-colors aria-pressed:bg-white aria-pressed:text-black aria-pressed:border-white border-white/10 text-neutral-400 hover:border-white/30"
+                    >
+                        {filtro}
+                    </button>
+                ))}
             </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 auto-rows-[300px]">
-            <div class="md:col-span-2 md:row-span-2 bg-neutral-900 border border-white/10 relative overflow-hidden group">
-                <div class="absolute inset-0 bg-neutral-800 flex items-center justify-center text-neutral-600 font-bold uppercase tracking-widest text-sm">
-                    [ Foto Tatuaje Destacado ]
-                </div>
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
-                <div class="absolute bottom-6 left-6">
-                    <span class="text-xs text-red-500 uppercase tracking-widest font-bold">Blackwork</span>
-                    <h3 class="text-white font-bold uppercase text-lg mt-1">Manga Completa - Sombras</h3>
-                </div>
-            </div>
-
-            <div class="md:row-span-2 bg-neutral-900 border border-white/10 relative overflow-hidden group">
-                <div class="absolute inset-0 bg-neutral-800 flex items-center justify-center text-neutral-600 font-bold uppercase tracking-widest text-sm">
-                    [ Foto Tatuaje Vertical ]
-                </div>
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
-                <div class="absolute bottom-6 left-6">
-                    <span class="text-xs text-red-500 uppercase tracking-widest font-bold">Fine Line</span>
-                    <h3 class="text-white font-bold uppercase text-lg mt-1">Geométrico Espalda</h3>
-                </div>
-            </div>
-
-            <div class="bg-neutral-900 border border-white/10 relative overflow-hidden group">
-                <div class="absolute inset-0 bg-neutral-800 flex items-center justify-center text-neutral-600 font-bold uppercase tracking-widest text-sm">
-                    [ Foto Miniatura 1 ]
-                </div>
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
-                <div class="absolute bottom-4 left-4">
-                    <h3 class="text-white font-bold uppercase text-sm">Lettering Pecho</h3>
-                </div>
-            </div>
-
-            <div class="bg-neutral-900 border border-white/10 relative overflow-hidden group">
-                <div class="absolute inset-0 bg-neutral-800 flex items-center justify-center text-neutral-600 font-bold uppercase tracking-widest text-sm">
-                    [ Foto Miniatura 2 ]
-                </div>
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
-                <div class="absolute bottom-4 left-4">
-                    <h3 class="text-white font-bold uppercase text-sm">Micro-realismo</h3>
-                </div>
-            </div>
+            {piezas.map((pieza, i) => {
+                const destacada = i < 2;
+                return (
+                    <figure
+                        data-estilo={pieza.estilo}
+                        data-tamano={tamanos[i] ?? ''}
+                        class:list={['pieza bg-neutral-900 border border-white/10 relative overflow-hidden group', tamanos[i]]}
+                    >
+                        {pieza.imagen ? (
+                            <img
+                                src={pieza.imagen}
+                                alt={`Tatuaje ${pieza.estilo}: ${pieza.titulo}`}
+                                loading="lazy"
+                                class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                        ) : (
+                            <div class="absolute inset-0 bg-neutral-800 flex items-center justify-center text-neutral-600 font-bold uppercase tracking-widest text-sm">
+                                [ Foto: {pieza.titulo} ]
+                            </div>
+                        )}
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
+                        <figcaption class:list={['absolute', destacada ? 'bottom-6 left-6' : 'bottom-4 left-4']}>
+                            <span class="text-xs text-red-500 uppercase tracking-widest font-bold">{pieza.estilo}</span>
+                            <h3 class:list={['text-white font-bold uppercase mt-1', destacada ? 'text-lg' : 'text-sm']}>{pieza.titulo}</h3>
+                        </figcaption>
+                    </figure>
+                );
+            })}
         </div>
     </div>
 </section>
+
+<script>
+    const botones = document.querySelectorAll<HTMLButtonElement>('.filtro-btn');
+    const piezas = document.querySelectorAll<HTMLElement>('.pieza');
+
+    botones.forEach((boton) => {
+        boton.addEventListener('click', () => {
+            const filtro = boton.dataset.filtro;
+            botones.forEach((b) => b.setAttribute('aria-pressed', String(b === boton)));
+
+            piezas.forEach((pieza) => {
+                const visible = filtro === 'Todos' || pieza.dataset.estilo === filtro;
+                pieza.hidden = !visible;
+                // Al filtrar, todas del mismo tamaño para que no queden huecos
+                const clases = (pieza.dataset.tamano ?? '').split(' ').filter(Boolean);
+                clases.forEach((c) => pieza.classList.toggle(c, filtro === 'Todos'));
+            });
+        });
+    });
+</script>

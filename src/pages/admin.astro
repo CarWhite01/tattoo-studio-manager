@@ -1,28 +1,48 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { supabase } from '../lib/supabase.js';
-
-const { data: citas, error } = await supabase
-  .from('citas')
-  .select('*')
-  .order('fecha', { ascending: true });
-
-if (error) {
-  console.error("Error al cargar las citas:", error);
-}
+// Las citas YA NO se cargan aquí (eso pasaba al hacer el build y quedaban
+// en el HTML público). Ahora se piden desde el navegador, solo después
+// de iniciar sesión, y Supabase (RLS) bloquea a quien no esté logueado.
 ---
 
-<Layout>
+<Layout title="Panel | Sonikoner" noindex>
+  <!-- LOGIN -->
+  <main id="login-view" class="min-h-screen flex items-center justify-center px-4 hidden">
+    <form id="login-form" class="w-full max-w-sm bg-neutral-950 border border-white/10 p-8 space-y-6">
+      <div>
+        <span class="text-xs uppercase tracking-[0.3em] text-red-600 font-semibold block mb-2">Acceso privado</span>
+        <h1 class="font-bold text-2xl uppercase tracking-tight">Panel de Sergio</h1>
+      </div>
+      <div>
+        <label for="login-email" class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Correo</label>
+        <input id="login-email" type="email" required autocomplete="username" class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none" />
+      </div>
+      <div>
+        <label for="login-password" class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Contraseña</label>
+        <input id="login-password" type="password" required autocomplete="current-password" class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none" />
+      </div>
+      <button type="submit" class="w-full bg-white text-black font-bold uppercase text-sm py-3 tracking-wider hover:bg-red-600 hover:text-white transition-colors">
+        Entrar
+      </button>
+      <p id="login-status" class="text-center text-xs uppercase tracking-wider font-semibold text-red-500 hidden"></p>
+    </form>
+  </main>
+
+  <!-- PANEL -->
   <main id="admin-panel" class="min-h-screen bg-black text-white p-6 sm:p-12 pt-24 hidden">
     <div class="max-w-6xl mx-auto">
-      
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-8 mb-10">
         <div>
           <span class="text-xs uppercase tracking-[0.3em] text-red-600 font-semibold block mb-2">Panel de Control</span>
           <h1 class="font-bold text-3xl sm:text-5xl uppercase tracking-tight">Agenda de Sergio</h1>
         </div>
-        <div class="bg-neutral-900 border border-white/10 px-4 py-2 text-xs uppercase tracking-wider font-semibold text-neutral-400">
-          Total: <span class="text-white font-bold">{citas ? citas.length : 0} citas</span>
+        <div class="flex items-center gap-3">
+          <div class="bg-neutral-900 border border-white/10 px-4 py-2 text-xs uppercase tracking-wider font-semibold text-neutral-400">
+            Total: <span id="total-citas" class="text-white font-bold">0 citas</span>
+          </div>
+          <button id="btn-logout" class="border border-white/10 px-4 py-2 text-xs uppercase tracking-wider font-semibold text-neutral-400 hover:border-red-600 hover:text-white transition-colors">
+            Salir
+          </button>
         </div>
       </div>
 
@@ -37,63 +57,13 @@ if (error) {
               <th class="p-4 font-bold text-center">Acciones</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-white/5 text-sm">
-            {citas && citas.length > 0 ? (
-              citas.map((cita) => (
-                <tr class="hover:bg-neutral-900/30 transition-colors">
-                  <td class="p-4">
-                    <div class="font-semibold text-white">{cita.nombre_cliente}</div>
-                    <div class="text-[10px] text-neutral-500 mt-1 uppercase tracking-wider">
-                      Registrado: <br/> 
-                      <span class="text-neutral-400">
-                        {new Date(cita.created_at).toLocaleDateString('es-MX')} a las {new Date(cita.created_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                  </td>
-                  
-                  <td class="p-4 text-neutral-300">
-                    <div class="font-medium text-emerald-400">{cita.fecha}</div>
-                    <div class="text-xs text-neutral-400 mt-0.5">{cita.hora.substring(0, 5)} hrs</div>
-                  </td>
-                  
-                  <td class="p-4 text-neutral-400 max-w-xs truncate" title={cita.idea_tatuaje}>
-                    {cita.idea_tatuaje || <span class="italic text-neutral-600">Sin descripción</span>}
-                  </td>
-                  
-                  <td class="p-4">
-                    <select 
-                      data-id={cita.id} 
-                      class="estado-select bg-neutral-900 border border-white/10 text-xs uppercase tracking-wider font-bold p-2 focus:border-red-600 focus:outline-none cursor-pointer hover:bg-neutral-800 transition-colors"
-                    >
-                      <option value="pendiente" selected={cita.estado === 'pendiente'}>Pendiente</option>
-                      <option value="confirmado" selected={cita.estado === 'confirmado'}>Confirmado</option>
-                      <option value="cancelado" selected={cita.estado === 'cancelado'}>Cancelado</option>
-                    </select>
-                  </td>
-                  
-                  <td class="p-4 text-center">
-                    <button 
-                      class="btn-whatsapp inline-block bg-neutral-900 border border-white/10 hover:border-emerald-500 hover:text-emerald-400 px-3 py-2 text-xs uppercase tracking-wider font-semibold transition-colors"
-                      data-nombre={cita.nombre_cliente}
-                      data-whatsapp={cita.whatsapp}
-                      data-fecha={cita.fecha}
-                    >
-                      💬 WhatsApp
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colspan="5" class="p-12 text-center text-neutral-500 uppercase tracking-widest text-xs">
-                  No hay citas registradas en la agenda.
-                </td>
-              </tr>
-            )}
+          <tbody id="citas-body" class="divide-y divide-white/5 text-sm">
+            <tr>
+              <td colspan="5" class="p-12 text-center text-neutral-500 uppercase tracking-widest text-xs">Cargando citas...</td>
+            </tr>
           </tbody>
         </table>
       </div>
-
     </div>
   </main>
 </Layout>
@@ -101,78 +71,190 @@ if (error) {
 <script>
   import { supabase } from '../lib/supabase.js';
 
-  // --- CANDADO DE SEGURIDAD NIVEL 1 ---
-  const panel = document.getElementById('admin-panel');
-  if (panel) {
-    if (localStorage.getItem('admin_authenticated') !== 'true') {
-      const password = prompt('Introduce la contraseña del Panel de Sergio:');
-      if (password === 'sergio123') { // <-- Aquí cambias la clave si quieres
-        localStorage.setItem('admin_authenticated', 'true');
-        panel.classList.remove('hidden');
-      } else {
-        alert('Contraseña incorrecta, cawon.');
-        window.location.href = '/'; // Lo echa a la página principal
-      }
-    } else {
-      panel.classList.remove('hidden');
-    }
+  // --- Datos de pago que se mandan por WhatsApp. CÁMBIALOS POR LOS REALES ---
+  const ANTICIPO = '$500 MXN';
+  const LINK_MERCADO_PAGO = 'https://link.mercadopago.com.mx/anticiposerh';
+  const BANCO = 'BBVA';
+  const CLABE = '012345678901234567';
+  const TARJETA = '4152 3134 0000 0000';
+
+  type Cita = {
+    id: number;
+    created_at: string;
+    nombre_cliente: string;
+    whatsapp: string;
+    fecha: string;
+    hora: string;
+    idea_tatuaje: string | null;
+    estado: 'pendiente' | 'confirmado' | 'cancelado';
+  };
+
+  const loginView = document.getElementById('login-view')!;
+  const panel = document.getElementById('admin-panel')!;
+  const loginForm = document.getElementById('login-form') as HTMLFormElement;
+  const loginStatus = document.getElementById('login-status')!;
+  const tbody = document.getElementById('citas-body')!;
+  const total = document.getElementById('total-citas')!;
+
+  // Limpia la "sesión" falsa de la versión anterior
+  localStorage.removeItem('admin_authenticated');
+
+  function mostrarLogin() {
+    panel.classList.add('hidden');
+    loginView.classList.remove('hidden');
   }
 
-  // 1. Guardar cambio de estado
-  const selects = document.querySelectorAll('.estado-select');
-  selects.forEach(select => {
-    select.addEventListener('change', async (e) => {
-      const target = e.target as HTMLSelectElement;
-      const citaId = target.getAttribute('data-id');
-      const nuevoEstado = target.value;
+  function mostrarPanel() {
+    loginView.classList.add('hidden');
+    panel.classList.remove('hidden');
+    cargarCitas();
+  }
 
-      target.style.opacity = '0.5';
-      const { error } = await supabase
-        .from('citas')
-        .update({ estado: nuevoEstado })
-        .eq('id', citaId);
-      target.style.opacity = '1';
+  // Crea un elemento con texto seguro (textContent evita inyectar HTML)
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, className = '', text = '') {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+  }
 
+  function filaVacia(texto: string) {
+    const tr = el('tr');
+    const td = el('td', 'p-12 text-center text-neutral-500 uppercase tracking-widest text-xs', texto);
+    td.colSpan = 5;
+    tr.append(td);
+    return tr;
+  }
+
+  function formatearFecha(fecha: string) {
+    return new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', {
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
+    });
+  }
+
+  function mensajeWhatsApp(cita: Cita, estado: string) {
+    const fecha = formatearFecha(cita.fecha);
+    const hora = cita.hora.substring(0, 5);
+    if (estado === 'confirmado') {
+      return `¡Qué onda ${cita.nombre_cliente}! Soy Sergio. Tu cita para el ${fecha} a las ${hora} hrs está confirmadísima. 🔥\n\n` +
+        `Para apartar oficialmente tu bloque en la agenda, se requiere un anticipo de ${ANTICIPO} (no reembolsable, se descuenta del total). Tienes estas dos opciones:\n\n` +
+        `1️⃣ OPCIÓN MÁS RÁPIDA (Link de Mercado Pago para Tarjeta o OXXO):\n👉 ${LINK_MERCADO_PAGO}\n\n` +
+        `2️⃣ TRANSFERENCIA DIRECTA (SPEI):\n• Banco: ${BANCO}\n• CLABE: ${CLABE}\n• O deposita a la tarjeta: ${TARJETA}\n\n` +
+        `En cuanto quede listo, me mandas la captura del comprobante por aquí. ¡Un abrazo!`;
+    }
+    if (estado === 'cancelado') {
+      return `Hola ${cita.nombre_cliente}, soy Sergio. Te escribo porque lamentablemente no tendré disponibilidad el ${fecha} a las ${hora} hrs. ¿Te late si buscamos otra fecha libre en el calendario?`;
+    }
+    return `Hola ${cita.nombre_cliente}, soy Sergio. Vi tu solicitud de tatuaje para el ${fecha} a las ${hora} hrs. Déjame revisar bien los horarios y te confirmo en breve.`;
+  }
+
+  function crearFila(cita: Cita) {
+    const tr = el('tr', 'hover:bg-neutral-900/30 transition-colors');
+
+    // Cliente
+    const tdCliente = el('td', 'p-4');
+    const creado = new Date(cita.created_at);
+    const registrado = el('div', 'text-[10px] text-neutral-500 mt-1 uppercase tracking-wider', 'Registrado: ');
+    registrado.append(el('br'), el('span', 'text-neutral-400',
+      `${creado.toLocaleDateString('es-MX')} a las ${creado.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}`));
+    tdCliente.append(el('div', 'font-semibold text-white', cita.nombre_cliente), registrado);
+
+    // Fecha
+    const tdFecha = el('td', 'p-4 text-neutral-300');
+    tdFecha.append(
+      el('div', 'font-medium text-emerald-400', formatearFecha(cita.fecha)),
+      el('div', 'text-xs text-neutral-400 mt-0.5', `${cita.hora.substring(0, 5)} hrs`),
+    );
+
+    // Detalles
+    const tdIdea = el('td', 'p-4 text-neutral-400 max-w-xs whitespace-normal break-words');
+    if (cita.idea_tatuaje) tdIdea.textContent = cita.idea_tatuaje;
+    else tdIdea.append(el('span', 'italic text-neutral-600', 'Sin descripción'));
+
+    // Estado
+    const tdEstado = el('td', 'p-4');
+    const select = el('select', 'bg-neutral-900 border border-white/10 text-xs uppercase tracking-wider font-bold p-2 focus:border-red-600 focus:outline-none cursor-pointer hover:bg-neutral-800 transition-colors');
+    for (const [valor, texto] of [['pendiente', 'Pendiente'], ['confirmado', 'Confirmado'], ['cancelado', 'Cancelado']]) {
+      const opt = el('option', '', texto);
+      opt.value = valor;
+      select.append(opt);
+    }
+    select.value = cita.estado;
+    select.addEventListener('change', async () => {
+      const anterior = cita.estado;
+      select.disabled = true;
+      select.style.opacity = '0.5';
+      const { error } = await supabase.from('citas').update({ estado: select.value }).eq('id', cita.id);
+      select.disabled = false;
+      select.style.opacity = '1';
       if (error) {
-        alert('Error al actualizar: ' + error.message);
+        select.value = anterior;
+        alert(error.code === '23505'
+          ? 'Ya hay otra cita activa en ese día y hora. Cancela esa primero.'
+          : 'Error al actualizar: ' + error.message);
+      } else {
+        cita.estado = select.value as Cita['estado'];
       }
     });
+    tdEstado.append(select);
+
+    // WhatsApp
+    const tdAcciones = el('td', 'p-4 text-center');
+    const btn = el('button', 'inline-block bg-neutral-900 border border-white/10 hover:border-emerald-500 hover:text-emerald-400 px-3 py-2 text-xs uppercase tracking-wider font-semibold transition-colors', '💬 WhatsApp');
+    btn.addEventListener('click', () => {
+      const url = `https://wa.me/52${cita.whatsapp}?text=${encodeURIComponent(mensajeWhatsApp(cita, select.value))}`;
+      window.open(url, '_blank', 'noopener');
+    });
+    tdAcciones.append(btn);
+
+    tr.append(tdCliente, tdFecha, tdIdea, tdEstado, tdAcciones);
+    return tr;
+  }
+
+  async function cargarCitas() {
+    const { data, error } = await supabase
+      .from('citas')
+      .select('*')
+      .order('fecha', { ascending: true })
+      .order('hora', { ascending: true });
+
+    tbody.replaceChildren();
+    if (error) {
+      tbody.append(filaVacia('Error al cargar las citas: ' + error.message));
+      return;
+    }
+    const citas = (data ?? []) as Cita[];
+    total.textContent = `${citas.length} citas`;
+    if (citas.length === 0) {
+      tbody.append(filaVacia('No hay citas registradas en la agenda.'));
+      return;
+    }
+    citas.forEach((cita) => tbody.append(crearFila(cita)));
+  }
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loginStatus.classList.add('hidden');
+    const email = (document.getElementById('login-email') as HTMLInputElement).value;
+    const password = (document.getElementById('login-password') as HTMLInputElement).value;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      loginStatus.textContent = 'Correo o contraseña incorrectos.';
+      loginStatus.classList.remove('hidden');
+      return;
+    }
+    loginForm.reset();
+    mostrarPanel();
   });
 
-  // 2. WhatsApp Inteligente con Anticipos Unificados
-  const botonesWa = document.querySelectorAll('.btn-whatsapp');
-  botonesWa.forEach(boton => {
-    boton.addEventListener('click', (e) => {
-      const target = e.target as HTMLButtonElement;
-      const nombre = target.getAttribute('data-nombre');
-      const telefono = target.getAttribute('data-whatsapp');
-      const fecha = target.getAttribute('data-fecha');
-      
-      const fila = target.closest('tr');
-      const estadoActual = (fila.querySelector('.estado-select') as HTMLSelectElement).value;
-      
-      let mensaje = "";
-      
-      if (estadoActual === 'pendiente') {
-        mensaje = `Hola ${nombre}, soy Sergio. Vi tu solicitud de tatuaje para el día ${fecha}. Déjame revisar bien los horarios y te confirmo en breve.`;
-      } 
-      else if (estadoActual === 'confirmado') {
-        mensaje = `¡Qué onda ${nombre}! Soy Sergio. Tu cita para el día ${fecha} está confirmadísima. 🔥\n\n` +
-                  `Para apartar oficialmente tu bloque en la agenda, se requiere un anticipo de $500 MXN. Tienes estas dos opciones bien fáciles:\n\n` +
-                  `1️⃣ OPCIÓN MÁS RÁPIDA (Link de Mercado Pago para Tarjeta o OXXO):\n` +
-                  `👉 https://link.mercadopago.com.mx/anticiposerh\n\n` +
-                  `2️⃣ TRANSFERENCIA DIRECTA (SPEI):\n` +
-                  `• Banco: BBVA\n` +
-                  `• CLABE: 012345678901234567\n` +
-                  `• O deposita a la tarjeta: 4152 3134 0000 0000\n\n` +
-                  `En cuanto quede listo, me mandas la captura del comprobante por aquí para cerrar el sistema. ¡Un abrazo!`;
-      } 
-      else if (estadoActual === 'cancelado') {
-        mensaje = `Hola ${nombre}, soy Sergio. Te escribo porque lamentablemente no tendré disponibilidad para armar tu tatuaje el día ${fecha}. ¿Te late si buscamos otra fecha libre en el calendario?`;
-      }
+  document.getElementById('btn-logout')!.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    tbody.replaceChildren();
+    mostrarLogin();
+  });
 
-      const url = `https://wa.me/52${telefono}?text=${encodeURIComponent(mensaje)}`;
-      window.open(url, '_blank');
-    });
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session) mostrarPanel();
+    else mostrarLogin();
   });
 </script>
