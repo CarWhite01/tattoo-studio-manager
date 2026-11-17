@@ -6,19 +6,19 @@
             <span class="text-xs uppercase tracking-[0.3em] text-red-600 font-semibold block mb-2">Agenda en Línea</span>
             <h2 class="font-bold text-3xl sm:text-5xl uppercase text-white tracking-tight">Aparta tu Sesión</h2>
             <p class="text-neutral-400 text-sm max-w-md mx-auto mt-3">
-                Selecciona tu fecha, hora y cuéntanos tu idea. Los datos se registrarán directamente en el sistema de Sergio.
+                Selecciona tu fecha, hora y cuéntanos tu idea. Sergio revisará tu solicitud y te confirmará por WhatsApp.
             </p>
         </div>
 
         <div class="bg-black border border-white/10 p-6 sm:p-10 max-w-xl mx-auto">
             <form id="booking-form" class="space-y-6">
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Tu Nombre Completo</label>
-                    <input type="text" id="nombre" required class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors" placeholder="Ej. Juan Pérez">
+                    <label for="nombre" class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Tu Nombre Completo</label>
+                    <input type="text" id="nombre" required autocomplete="name" maxlength="80" class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors" placeholder="Ej. Juan Pérez">
                 </div>
 
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">WhatsApp (10 dígitos sin espacios)</label>
+                    <label for="whatsapp" class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">WhatsApp (10 dígitos sin espacios)</label>
                     <input 
                       type="tel" 
                       id="whatsapp" 
@@ -33,12 +33,14 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Fecha de la Cita</label>
-                        <input type="date" id="fecha" required class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors">
+                        <label for="fecha" class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Fecha de la Cita</label>
+                        <input type="date" id="fecha" required aria-describedby="fecha-ayuda" class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors">
+                        <p id="fecha-ayuda" class="text-[10px] text-neutral-500 uppercase tracking-wider mt-1">Lunes a sábado</p>
                     </div>
                     <div>
-                        <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Hora (Bloques de 3h)</label>
+                        <label for="hora" class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Hora (Bloques de 3h)</label>
                         <select id="hora" required class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors">
+                            <option value="" disabled selected>Elige una fecha primero</option>
                             <option value="11:00">11:00 AM</option>
                             <option value="14:00">02:00 PM</option>
                             <option value="17:00">05:00 PM</option>
@@ -48,7 +50,7 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Estilo</label>
+                        <label for="estilo" class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Estilo</label>
                         <select id="estilo" required class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors">
                             <option value="Blackwork">Blackwork</option>
                             <option value="Realismo">Realismo</option>
@@ -59,7 +61,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Zona</label>
+                        <label for="zona" class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Zona</label>
                         <select id="zona" required class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors">
                             <option value="" disabled selected>Elige una zona...</option>
                             <option value="Brazo / Antebrazo">Brazo / Antebrazo</option>
@@ -72,7 +74,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Tamaño</label>
+                        <label for="tamano" class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Tamaño</label>
                         <select id="tamano" required class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors">
                             <option value="Pequeño (1-5cm)">Pequeño (1-5cm)</option>
                             <option value="Mediano (5-15cm)">Mediano (5-15cm)</option>
@@ -82,15 +84,15 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Detalles extras / Hora en específico</label>
-                    <textarea id="detalles" rows="2" class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors" placeholder="Ej. Me gustaría que fuera a las 3:00 PM, o el estilo es diferente..."></textarea>
+                    <label for="detalles" class="block text-xs uppercase tracking-wider text-neutral-400 font-bold mb-2">Detalles extras / Referencias</label>
+                    <textarea id="detalles" rows="2" maxlength="500" class="w-full bg-neutral-900 border border-white/10 p-3 text-white text-sm focus:border-red-600 focus:outline-none transition-colors" placeholder="Ej. Quiero una golondrina con flores, tengo una referencia que te mando por WhatsApp..."></textarea>
                 </div>
 
-                <button type="submit" class="w-full bg-white text-black font-bold uppercase text-sm py-4 tracking-wider hover:bg-red-600 hover:text-white transition-colors duration-300">
+                <button type="submit" id="btn-agendar" class="disabled:opacity-50 disabled:cursor-not-allowed w-full bg-white text-black font-bold uppercase text-sm py-4 tracking-wider hover:bg-red-600 hover:text-white transition-colors duration-300">
                     Confirmar y Agendar
                 </button>
                 
-                <p id="form-status" class="text-center text-xs uppercase tracking-wider font-semibold hidden"></p>
+                <p id="form-status" class="text-center text-xs uppercase tracking-wider font-semibold hidden" role="status" aria-live="polite"></p>
             </form>
         </div>
     </div>
@@ -99,88 +101,132 @@
 <script>
     import { supabase } from '../lib/supabase.js';
 
-    const form = document.getElementById('booking-form');
-    const statusText = document.getElementById('form-status');
-    const fechaInput = document.getElementById('fecha');
-    const horaSelect = document.getElementById('hora');
+    const form = document.getElementById('booking-form') as HTMLFormElement | null;
+    const statusText = document.getElementById('form-status')!;
+    const fechaInput = document.getElementById('fecha') as HTMLInputElement | null;
+    const horaSelect = document.getElementById('hora') as HTMLSelectElement | null;
+    const btnAgendar = document.getElementById('btn-agendar') as HTMLButtonElement;
 
-    if (fechaInput && horaSelect) {
-        fechaInput.addEventListener('change', async (e) => {
-            const target = e.target as HTMLInputElement;
-            const fechaSeleccionada = target.value;
-            
-            Array.from(horaSelect.options).forEach(opt => {
-                opt.disabled = false;
-                opt.text = opt.text.replace(' (Ocupado)', '');
-            });
+    // Fecha local en formato YYYY-MM-DD (toISOString usaría UTC y daría el día equivocado de noche)
+    function fechaLocal(d: Date) {
+        const pad = (n: number) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
 
-            if (!fechaSeleccionada) return;
+    function mostrarEstado(texto: string, tipo: 'info' | 'error' | 'ok') {
+        statusText.classList.remove('hidden', 'text-red-500', 'text-green-500', 'text-neutral-400');
+        statusText.classList.add(tipo === 'error' ? 'text-red-500' : tipo === 'ok' ? 'text-green-500' : 'text-neutral-400');
+        statusText.textContent = texto;
+    }
 
-            const { data, error } = await supabase
-                .from('citas')
-                .select('hora')
-                .eq('fecha', fechaSeleccionada);
+    // Una hora ya pasó si la cita es hoy y la hora es anterior a ahora
+    function horaYaPaso(fecha: string, hora: string) {
+        return new Date(`${fecha}T${hora}:00`) <= new Date();
+    }
 
-            if (error) {
-                console.error("Error al buscar horarios:", error);
-                return;
+    async function actualizarHorarios() {
+        if (!fechaInput || !horaSelect) return;
+        const fecha = fechaInput.value;
+        const opciones = Array.from(horaSelect.options).filter((opt) => opt.value);
+
+        opciones.forEach((opt) => {
+            opt.disabled = false;
+            opt.text = opt.text.replace(/ \((Ocupado|Ya pasó)\)$/, '');
+        });
+        fechaInput.setCustomValidity('');
+
+        if (!fecha) return;
+
+        // El estudio abre de lunes a sábado
+        if (new Date(`${fecha}T00:00:00`).getDay() === 0) {
+            fechaInput.setCustomValidity('Los domingos no hay citas, elige de lunes a sábado.');
+            fechaInput.reportValidity();
+            opciones.forEach((opt) => (opt.disabled = true));
+            horaSelect.value = '';
+            return;
+        }
+
+        // Solo pedimos las horas ocupadas (sin nombres ni teléfonos de otros clientes)
+        const { data, error } = await supabase.rpc('horas_ocupadas', { dia: fecha });
+        if (error) {
+            console.error('Error al buscar horarios:', error);
+            mostrarEstado('No pudimos revisar los horarios, intenta de nuevo.', 'error');
+            return;
+        }
+
+        const ocupadas = (data ?? []).map((c: { hora: string }) => c.hora.substring(0, 5));
+        opciones.forEach((opt) => {
+            if (ocupadas.includes(opt.value)) {
+                opt.disabled = true;
+                opt.text = `${opt.text} (Ocupado)`;
+            } else if (horaYaPaso(fecha, opt.value)) {
+                opt.disabled = true;
+                opt.text = `${opt.text} (Ya pasó)`;
             }
+        });
 
-            if (data && data.length > 0) {
-                const horasOcupadas = data.map(cita => cita.hora.substring(0, 5));
-                
-                Array.from(horaSelect.options).forEach(opt => {
-                    if (horasOcupadas.includes(opt.value)) {
-                        opt.disabled = true;
-                        opt.text = `${opt.text} (Ocupado)`;
-                    }
-                });
-            }
+        const seleccionada = horaSelect.selectedOptions[0];
+        if (!seleccionada || seleccionada.disabled) {
+            const libre = opciones.find((opt) => !opt.disabled);
+            horaSelect.value = libre ? libre.value : '';
+            if (!libre) mostrarEstado('Ese día ya está lleno, prueba con otra fecha.', 'info');
+        }
+    }
+
+    if (fechaInput) {
+        fechaInput.min = fechaLocal(new Date());
+        fechaInput.addEventListener('change', () => {
+            statusText.classList.add('hidden');
+            actualizarHorarios();
         });
     }
 
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            statusText.classList.remove('hidden', 'text-red-500', 'text-green-500');
-            statusText.classList.add('text-neutral-400');
-            statusText.innerText = 'Procesando tu cita...';
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
 
-            const nombre = (document.getElementById('nombre') as HTMLInputElement).value;
-            const whatsapp = (document.getElementById('whatsapp') as HTMLInputElement).value;
-            const fecha = (document.getElementById('fecha') as HTMLInputElement).value;
-            const hora = (document.getElementById('hora') as HTMLSelectElement).value;
-            
-            const estilo = (document.getElementById('estilo') as HTMLSelectElement).value;
-            const zona = (document.getElementById('zona') as HTMLSelectElement).value;
-            const tamano = (document.getElementById('tamano') as HTMLSelectElement).value;
-            const detalles = (document.getElementById('detalles') as HTMLTextAreaElement).value;
+            const valor = (id: string) => (document.getElementById(id) as HTMLInputElement).value.trim();
+            const fecha = valor('fecha');
+            const hora = valor('hora');
 
-            const ideaFinal = `Estilo: ${estilo} | Zona: ${zona} | Tamaño: ${tamano} | Notas: ${detalles || 'Ninguna'}`;
+            if (!hora) {
+                mostrarEstado('Elige una hora disponible.', 'error');
+                return;
+            }
 
-            const { error } = await supabase
-                .from('citas')
-                .insert([
-                    { 
-                        nombre_cliente: nombre, 
-                        whatsapp: whatsapp, 
-                        fecha: fecha, 
-                        hora: hora, 
-                        idea_tatuaje: ideaFinal 
-                    }
-                ]);
+            btnAgendar.disabled = true;
+            mostrarEstado('Procesando tu cita...', 'info');
+
+            const ideaFinal = `Estilo: ${valor('estilo')} | Zona: ${valor('zona')} | Tamaño: ${valor('tamano')} | Notas: ${valor('detalles') || 'Ninguna'}`;
+
+            const { error } = await supabase.from('citas').insert([{
+                nombre_cliente: valor('nombre'),
+                whatsapp: valor('whatsapp'),
+                fecha,
+                hora,
+                idea_tatuaje: ideaFinal,
+            }]);
+
+            btnAgendar.disabled = false;
 
             if (error) {
-                statusText.classList.replace('text-neutral-400', 'text-red-500');
-                statusText.innerText = 'Error al agendar: ' + error.message;
-                console.error("Error de Supabase:", error);
-            } else {
-                statusText.classList.replace('text-neutral-400', 'text-green-500');
-                statusText.innerText = '¡Cita registrada con éxito en Supabase!';
-                (form as HTMLFormElement).reset();
-                fechaInput.dispatchEvent(new Event('change'));
+                console.error('Error de Supabase:', error);
+                if (error.code === '23505') {
+                    mostrarEstado('Alguien acaba de apartar ese horario. Elige otro, porfa.', 'error');
+                    actualizarHorarios();
+                } else {
+                    mostrarEstado('No se pudo registrar tu cita. Intenta de nuevo o escríbenos por WhatsApp.', 'error');
+                }
+                return;
             }
+
+            mostrarEstado('¡Listo! Recibimos tu solicitud. Sergio te escribirá por WhatsApp para confirmar.', 'ok');
+            form.reset();
+            actualizarHorarios();
         });
     }
 </script>
